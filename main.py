@@ -5,6 +5,9 @@ BOARD_SIZE_X = 3
 BOARD_SIZE_Y = 3
 EMPTY = ' '
 TOKENS = ('X', 'O')
+H_SEPERATOR = '|'
+V_SEPERATOR = '-'
+
 
 class Board:
     """Checker style board."""
@@ -27,8 +30,42 @@ class Board:
         self.grid[self.get_row(pos)][self.get_column(pos)] = token
 
 
+class ConsoleInterface:
+    """Console user interface."""
+
+    @staticmethod
+    def print_board(board: Board):
+        rows = [f' {H_SEPERATOR} '.join(row) for row in board.grid]
+        h_line = ''.join([V_SEPERATOR * len(rows[0])])
+        board_str = f'\n{h_line}\n'.join(rows)
+        print(board_str)
+
+    @staticmethod
+    def read_token(max_val, min_val=1) -> int:
+        while True:
+            user_input = input('Place your token: ')
+            try:
+                token_pos = int(user_input)
+                if not min_val <= token_pos <= max_val:
+                    print(f'Token has to be placed in range {min_val} to ' +
+                          f'{max_val}. Try again.')
+                else:
+                    return token_pos
+            except ValueError:
+                print('This is not a Number. Try again.')
+
+    @staticmethod
+    def print_is_blocked():
+        print('Already blocked. Try again.')
+
+    @staticmethod
+    def print_has_won():
+        print('You win.')
+
+
 def main():
-  board = Board(BOARD_SIZE_X, BOARD_SIZE_Y)
+    board = Board(BOARD_SIZE_X, BOARD_SIZE_Y)
+    ci = ConsoleInterface()
 
 
 if __name__ == '__main__':
