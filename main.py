@@ -67,9 +67,54 @@ class ConsoleInterface:
         print('You win.')
 
 
+class WinningCondition(ABC):
+
+    @abstractmethod
+    def has_won(self, board: Board) -> bool:
+        pass
+
+
+class TicTacToe:
+    """Handles the game logic."""
+
+    def __init__(self, board: Board, ci: ConsoleInterface,
+                 rules: List[WinningCondition], tokens: List[str]):
+        self.board = board
+        self.ci = ci
+        self.rules = rules
+        self.tokens = tokens
+
+    def make_turn(self, count):
+        while True:
+            pos = self.ci.read_token(self.board.size)
+            if self.board.is_empty(pos):
+                self.board.place_token(
+                    pos, self.tokens[count % len(self.tokens)])
+                self.ci.print_board(self.board)
+                break
+            self.ci.print_is_blocked()
+
+    def has_won(self):
+        for rule in self.rules:
+            if rule.has_won(self.board):
+                return True
+        return False
+
+    def run(self):
+        self.ci.print_board(self.board)
+        for i in range(self.board.size):
+            self.make_turn(count=i)
+            if self.has_won():
+                self.ci.print_has_won()
+                break
+
+
 def main():
     board = Board(BOARD_SIZE_X, BOARD_SIZE_Y)
     ci = ConsoleInterface(H_SEPERATOR, V_SEPERATOR)
+    rules = []
+    game = TicTacToe(board, ci, rules, TOKENS)
+    game.run()
 
 
 if __name__ == '__main__':
