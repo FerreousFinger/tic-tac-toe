@@ -69,7 +69,7 @@ class ConsoleInterface:
 
 def main():
     board = Board(BOARD_SIZE_X, BOARD_SIZE_Y)
-    ci = ConsoleInterface()
+    ci = ConsoleInterface(H_SEPERATOR, V_SEPERATOR)
 
 
 if __name__ == '__main__':
