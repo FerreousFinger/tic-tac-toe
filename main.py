@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """A simple Tic-Tac-Toe game."""
+from abc import ABC, abstractmethod
+from typing import List
+
 BOARD_SIZE_X = 3
 BOARD_SIZE_Y = 3
 EMPTY = ' '
