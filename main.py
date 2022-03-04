@@ -74,6 +74,62 @@ class WinningCondition(ABC):
         pass
 
 
+def completed(tokens):
+    return len(tokens) == 1 and EMPTY not in tokens
+
+
+class RowCompleted(WinningCondition):
+
+    def has_won(self, board: Board) -> bool:
+        for row in board.grid:
+            if completed(set(row)):
+                return True
+        return False
+
+
+class ColumnCompleted(WinningCondition):
+
+    def _column_content(self, board: Board, column: int) -> set:
+        content = []
+        for row in range(BOARD_SIZE_Y):
+            content.append(board.grid[row][column])
+        return set(content)
+
+    def has_won(self, board: Board) -> bool:
+        for column in range(BOARD_SIZE_X):
+            column_content = self._column_content(board, column)
+            if completed(set(column_content)):
+                return True
+        return False
+
+
+class GridDimensionError(Exception):
+    pass
+
+
+class DiagonalComplete(WinningCondition):
+
+    def _get_left_to_right(self, grid: List[List[int]]) -> set:
+        values = []
+        for i in range(len(grid)):
+            values.append(grid[i][i])
+        return set(values)
+
+    def _right_to_left(self, grid: List[List[int]]) -> set:
+        values = []
+        for i in range(len(grid)):
+            pos = len(grid) - i - 1
+            values.append(grid[i][pos])
+        return set(values)
+
+    def has_won(self, board: Board) -> bool:
+        if not BOARD_SIZE_X == BOARD_SIZE_Y:
+            raise GridDimensionError("only use with n x n grid")
+        left_to_right = self._get_left_to_right(board.grid)
+        right_to_left = self._right_to_left(board.grid)
+        return completed(left_to_right) or completed(right_to_left)
+
+
 class TicTacToe:
     """Handles the game logic."""
 
@@ -112,7 +168,7 @@ class TicTacToe:
 def main():
     board = Board(BOARD_SIZE_X, BOARD_SIZE_Y)
     ci = ConsoleInterface(H_SEPERATOR, V_SEPERATOR)
-    rules = []
+    rules = [RowCompleted(), ColumnCompleted(), DiagonalComplete()]
     game = TicTacToe(board, ci, rules, TOKENS)
     game.run()
 
