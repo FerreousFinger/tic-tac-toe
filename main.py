@@ -6,8 +6,8 @@ from typing import List
 
 BOARD_SIZE_X = 3
 BOARD_SIZE_Y = 3
-EMPTY = ' '
-TOKENS = ('X', 'O')
+EMPTY_TOKEN = ' '
+PLAYER_TOKENS = ('X', 'O')
 H_SEPERATOR = '|'
 V_SEPERATOR = '-'
 
@@ -15,11 +15,12 @@ V_SEPERATOR = '-'
 class Board:
     """Checker style board."""
 
-    def __init__(self, size_x, size_y):
+    def __init__(self, size_x, size_y, empty_token):
         self.size_x = size_x
         self.size_y = size_y
         self.size = int(size_x * size_y)
-        self.grid = [[EMPTY] * size_x for _ in range(size_y)]
+        self.empty = empty_token
+        self.grid = [[self.empty] * size_x for _ in range(size_y)]
 
     def get_row(self, pos: int) -> int:
         return len(self.grid) - (pos - 1)//self.size_y - 1
@@ -28,7 +29,7 @@ class Board:
         return pos % self.size_x - 1
 
     def is_empty(self, pos: int) -> bool:
-        return self.grid[self.get_row(pos)][self.get_column(pos)] == EMPTY
+        return self.grid[self.get_row(pos)][self.get_column(pos)] == self.empty
 
     def place_token(self, pos: int, token: str):
         self.grid[self.get_row(pos)][self.get_column(pos)] = token
@@ -77,7 +78,7 @@ class WinningCondition(ABC):
         pass
 
 
-def completed(tokens):
+def completed(tokens, empty_token):
     return len(tokens) == 1 and EMPTY not in tokens
 
 
@@ -94,12 +95,12 @@ class ColumnCompleted(WinningCondition):
 
     def _column_content(self, board: Board, column: int) -> set:
         content = []
-        for row in range(BOARD_SIZE_Y):
+        for row in range(board.size_y):
             content.append(board.grid[row][column])
         return set(content)
 
     def has_won(self, board: Board) -> bool:
-        for column in range(BOARD_SIZE_X):
+        for column in range(board.size_x):
             column_content = self._column_content(board, column)
             if completed(set(column_content)):
                 return True
@@ -126,7 +127,7 @@ class DiagonalComplete(WinningCondition):
         return set(values)
 
     def has_won(self, board: Board) -> bool:
-        if not BOARD_SIZE_X == BOARD_SIZE_Y:
+        if not board.size_x == board.size_y:
             raise GridDimensionError("only use with n x n grid")
         left_to_right = self._get_left_to_right(board.grid)
         right_to_left = self._right_to_left(board.grid)
@@ -169,10 +170,10 @@ class TicTacToe:
 
 
 def main():
-    board = Board(BOARD_SIZE_X, BOARD_SIZE_Y)
+    board = Board(BOARD_SIZE_X, BOARD_SIZE_Y, EMPTY_TOKEN)
     ci = ConsoleInterface(H_SEPERATOR, V_SEPERATOR)
     rules = [RowCompleted(), ColumnCompleted(), DiagonalComplete()]
-    game = TicTacToe(board, ci, rules, TOKENS)
+    game = TicTacToe(board, ci, rules, PLAYER_TOKENS)
     game.run()
 
 
