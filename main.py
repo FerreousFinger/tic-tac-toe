@@ -9,79 +9,111 @@ BOARD_SIZE_X = 3
 BOARD_SIZE_Y = 3
 EMPTY_TOKEN = ' '
 PLAYER_TOKENS = ('X', 'O')
-H_SEPERATOR = '|'
-V_SEPERATOR = '-'
+H_SEPERATOR = '-'
+V_SEPERATOR = '|'
 
 
 class Board:
-    """Checker style board."""
+    """Checker style board.
 
-    def __init__(self, size_x, size_y, empty_token):
+    Parameters
+    ----------
+    size_x : int
+        Number of squares on the board in x direction.
+    size_y : int
+        Number of squares on the board in y direction.
+    empty_token : str
+        Symbol used to represent empty squares.
+
+    """
+
+    def __init__(self, size_x: int, size_y: int, empty_token: str):
         self.size_x = size_x
         self.size_y = size_y
         self.size = int(size_x * size_y)
         self.empty_token = empty_token
         self.grid = [[self.empty_token] * size_x for _ in range(size_y)]
 
-    def get_row(self, pos: int) -> int:
-        return len(self.grid) - (pos - 1)//self.size_y - 1
+    def get_row(self, square_id: int) -> int:
+        """Convert the `square_id` into the corresponding row number."""
+        return len(self.grid) - (square_id - 1)//self.size_y - 1
 
-    def get_column(self, pos: int) -> int:
-        return pos % self.size_x - 1
+    def get_column(self, square_id: int) -> int:
+        """Convert the `square_id` into the corresponding column number."""
+        return square_id % self.size_x - 1
 
-    def is_empty(self, pos: int) -> bool:
-        return (self.grid[self.get_row(pos)][self.get_column(pos)] ==
-                self.empty_token)
+    def is_empty(self, square_id: int) -> bool:
+        """Check if the given square is empty."""
+        row = self.get_row(square_id)
+        column = self.get_column(square_id)
+        return self.grid[row][column] == self.empty_token
 
-    def place_token(self, pos: int, token: str):
-        self.grid[self.get_row(pos)][self.get_column(pos)] = token
+    def place_token(self, square_id: int, token: str):
+        """Place a token onto the given square."""
+        self.grid[self.get_row(square_id)][self.get_column(square_id)] = token
 
 
 class ConsoleInterface:
-    """Console user interface."""
+    """Console user interface.
 
-    def __init__(self, h_sep, v_sep):
+    Parameters
+    ----------
+    h_sep : str
+        Symbol used to draw horizontal lines on the board.
+    v_sep : str
+        Symbol used to draw vertical lines on the board.
+
+    """
+
+    def __init__(self, h_sep: str, v_sep: str):
         self.h_sep = h_sep
         self.v_sep = v_sep
 
     def print_board(self, board: Board):
+        """Print the board to the console."""
         os.system('cls')
-        rows = [f' {self.h_sep} '.join(row) for row in board.grid]
-        h_line = ''.join([self.v_sep * len(rows[0])])
+        rows = [f' {self.v_sep} '.join(row) for row in board.grid]
+        h_line = ''.join([self.h_sep * len(rows[0])])
         board_str = f'\n{h_line}\n'.join(rows)
         print(board_str)
 
     @staticmethod
-    def read_token(max_val, min_val=1) -> int:
+    def read_token(max_val: int, min_val: int = 1) -> int:
+        """Ask the player where they want to place their token."""
         while True:
             user_input = input('Place your token: ')
+            token_pos = None
             try:
                 token_pos = int(user_input)
-                if not min_val <= token_pos <= max_val:
-                    print(f'Token has to be placed in range {min_val} to ' +
-                          f'{max_val}. Try again.')
-                else:
-                    return token_pos
             except ValueError:
                 print('This is not a Number. Try again.')
+            if not None and not min_val <= token_pos <= max_val:
+                print(f'Token has to be placed in range {min_val} to ' +
+                      f'{max_val}. Try again.')
+            else:
+                return token_pos
 
     @staticmethod
     def print_is_blocked():
+        """Tell the player that the sqaure is already block by a token."""
         print('Already blocked. Try again.')
 
     @staticmethod
     def print_has_won():
+        """Tell the player they won the game."""
         print('You win.')
 
 
 class WinningCondition(ABC):
+    """Interface for winning conditions."""
 
     @abstractmethod
     def has_won(self, board: Board) -> bool:
-        pass
+        """Check if the player has won the game."""
 
 
-def completed(tokens, empty_token):
+def completed(tokens: List[str], empty_token: str):
+    """Check if the player has completed a line of tokens."""
     return len(tokens) == 1 and empty_token not in tokens
 
 
