@@ -3,6 +3,7 @@
 """A simple Tic-Tac-Toe game."""
 from abc import ABC, abstractmethod
 from typing import List
+import os
 
 BOARD_SIZE_X = 3
 BOARD_SIZE_Y = 3
@@ -19,8 +20,8 @@ class Board:
         self.size_x = size_x
         self.size_y = size_y
         self.size = int(size_x * size_y)
-        self.empty = empty_token
-        self.grid = [[self.empty] * size_x for _ in range(size_y)]
+        self.empty_token = empty_token
+        self.grid = [[self.empty_token] * size_x for _ in range(size_y)]
 
     def get_row(self, pos: int) -> int:
         return len(self.grid) - (pos - 1)//self.size_y - 1
@@ -29,7 +30,8 @@ class Board:
         return pos % self.size_x - 1
 
     def is_empty(self, pos: int) -> bool:
-        return self.grid[self.get_row(pos)][self.get_column(pos)] == self.empty
+        return (self.grid[self.get_row(pos)][self.get_column(pos)] ==
+                self.empty_token)
 
     def place_token(self, pos: int, token: str):
         self.grid[self.get_row(pos)][self.get_column(pos)] = token
@@ -79,14 +81,14 @@ class WinningCondition(ABC):
 
 
 def completed(tokens, empty_token):
-    return len(tokens) == 1 and EMPTY not in tokens
+    return len(tokens) == 1 and empty_token not in tokens
 
 
 class RowCompleted(WinningCondition):
 
     def has_won(self, board: Board) -> bool:
         for row in board.grid:
-            if completed(set(row)):
+            if completed(set(row), board.empty_token):
                 return True
         return False
 
@@ -102,7 +104,7 @@ class ColumnCompleted(WinningCondition):
     def has_won(self, board: Board) -> bool:
         for column in range(board.size_x):
             column_content = self._column_content(board, column)
-            if completed(set(column_content)):
+            if completed(set(column_content), board.empty_token):
                 return True
         return False
 
@@ -131,7 +133,8 @@ class DiagonalComplete(WinningCondition):
             raise GridDimensionError("only use with n x n grid")
         left_to_right = self._get_left_to_right(board.grid)
         right_to_left = self._right_to_left(board.grid)
-        return completed(left_to_right) or completed(right_to_left)
+        return (completed(left_to_right, board.empty_token) or
+                completed(right_to_left, board.empty_token))
 
 
 class TicTacToe:
