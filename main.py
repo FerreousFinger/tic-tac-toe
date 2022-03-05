@@ -45,6 +45,7 @@ class ConsoleInterface:
         self.v_sep = v_sep
 
     def print_board(self, board: Board):
+        os.system('cls')
         rows = [f' {self.h_sep} '.join(row) for row in board.grid]
         h_line = ''.join([self.v_sep * len(rows[0])])
         board_str = f'\n{h_line}\n'.join(rows)
