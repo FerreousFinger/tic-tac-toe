@@ -30,9 +30,13 @@ class Board:
     def __init__(self, size_x: int, size_y: int, empty_token: str):
         self.size_x = size_x
         self.size_y = size_y
-        self.size = int(size_x * size_y)
         self.empty_token = empty_token
         self.grid = [[self.empty_token] * size_x for _ in range(size_y)]
+
+    @property
+    def size(self):
+        """Total nuber of squares on the board."""
+        return int(self.size_x * self.size_y)
 
     def get_row(self, square_id: int) -> int:
         """Convert the `square_id` into the corresponding row number."""
